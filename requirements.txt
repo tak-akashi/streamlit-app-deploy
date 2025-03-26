@@ -24,7 +24,7 @@ pyarrow==19.0.1
 pydeck==0.9.1
 Pygments==2.19.1
 python-dateutil==2.9.0.post0
-pytz==2025.1
+pytz==2025.2
 referencing==0.36.2
 requests==2.32.3
 rich==13.9.4
@@ -35,6 +35,6 @@ streamlit==1.41.1
 tenacity==9.0.0
 toml==0.10.2
 tornado==6.4.2
-typing_extensions==4.12.2
+typing_extensions==4.13.0
 tzdata==2025.2
 urllib3==2.3.0
