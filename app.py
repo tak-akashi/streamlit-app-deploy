@@ -1,45 +1,37 @@
 import streamlit as st
+from dotenv import load_dotenv
+import os
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import SystemMessage, HumanMessage
 
-st.title("サンプルアプリ②: 少し複雑なWebアプリ")
+# 環境変数読み込み
+load_dotenv()
 
-st.write("##### 動作モード1: 文字数カウント")
-st.write("入力フォームにテキストを入力し、「実行」ボタンを押すことで文字数をカウントできます。")
-st.write("##### 動作モード2: BMI値の計算")
-st.write("身長と体重を入力することで、肥満度を表す体型指数のBMI値を算出できます。")
-
-selected_item = st.radio(
-    "動作モードを選択してください。",
-    ["文字数カウント", "BMI値の計算"]
-)
-
-st.divider()
-
-if selected_item == "文字数カウント":
-    input_message = st.text_input(label="文字数のカウント対象となるテキストを入力してください。")
-    text_count = len(input_message)
-
+# Streamlit Cloudの場合はst.secretsから取得
+if 'OPENAI_API_KEY' in st.secrets:
+    api_key = st.secrets['OPENAI_API_KEY']
+ # ローカル開発時は.envファイルから取得（オプション）
 else:
-    height = st.text_input(label="身長（cm）を入力してください。")
-    weight = st.text_input(label="体重（kg）を入力してください。")
+    api_key = os.getenv("OPENAI_API_KEY")
 
-if st.button("実行"):
-    st.divider()
+# 回答生成関数
+def generate_response(role, user_input):
+    system_msg = SystemMessage(content=f"あなたは{role}の専門家です。質問に優しく丁寧に答えてください。")
+    human_msg = HumanMessage(content=user_input)
+    chat = ChatOpenAI(temperature=0.7, openai_api_key=api_key)
+    response = chat([system_msg, human_msg])
+    return response.content
 
-    if selected_item == "文字数カウント":
-        if input_message:
-            st.write(f"文字数: **{text_count}**")
+# Streamlit UI
+st.title("💡 LLM専門家チャットアプリ")
+st.write("👇 専門家を選んで、質問を入力してください")
 
-        else:
-            st.error("カウント対象となるテキストを入力してから「実行」ボタンを押してください。")
+role = st.radio("専門家を選択", ("医療の専門家", "法律の専門家", "ITコンサルタント"))
+user_input = st.text_input("あなたの質問は？")
 
+if st.button("送信"):
+    if user_input:
+        answer = generate_response(role, user_input)
+        st.markdown(f"### 回答:\n{answer}")
     else:
-        if height and weight:
-            try:
-                bmi = round(int(weight) / ((int(height)/100) ** 2), 1)
-                st.write(f"BMI値: {bmi}")
-
-            except ValueError as e:
-                st.error("身長と体重は数値で入力してください。")
-
-        else:
-            st.error("身長と体重をどちらも入力してください。")
+        st.warning("質問を入力してください。")
