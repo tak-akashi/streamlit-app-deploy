@@ -7,12 +7,16 @@ from langchain.schema import SystemMessage, HumanMessage
 # 環境変数読み込み
 load_dotenv()
 
-# Streamlit Cloudの場合はst.secretsから取得
-if 'OPENAI_API_KEY' in st.secrets:
+api_key = None
+
+try:
+    # Streamlit Cloudの場合はst.secretsから取得を試みる
     api_key = st.secrets['OPENAI_API_KEY']
- # ローカル開発時は.envファイルから取得（オプション）
-else:
+except FileNotFoundError:
+    # ローカル開発時は.envファイルから取得
     api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        st.error("APIキーが設定されていません。.envファイルを確認してください。")
 
 # 回答生成関数
 def generate_response(role, user_input):
